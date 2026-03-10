@@ -1,18 +1,20 @@
-const Pool = require('pg').Pool
+const pg = require('pg');
 
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-})
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 
-pool.query('SELECT * FROM users ORDER BY id ASC', (error, results) => {
-    if (error) {
-      throw error
-    }
-    console.table(results.rows)
-  })
+async function ConnectDatabase() {
+  try {
+    const client = await pool.connect();
+    console.log('Connected to the database successfully');
+    return { client, pool };
+  } catch(err) {
+    console.error('Error connecting to the database', err.stack);
+  }
+}
 
-module.exports = pool
+module.exports = ConnectDatabase();
