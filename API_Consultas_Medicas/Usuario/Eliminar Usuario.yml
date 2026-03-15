@@ -1,0 +1,17 @@
+info:
+  name: Eliminar Usuario
+  type: http
+  seq: 2
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/usuarios/cliente/8"
+  auth:
+    type: bearer
+    token: "{{administradorToken}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

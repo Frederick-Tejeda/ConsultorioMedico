@@ -1,0 +1,29 @@
+info:
+  name: Autenticar Administrador
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/usuarios/administrador/auth"
+  body:
+    type: json
+    data: |-
+      { 
+        "correo": "admin@admin.admin", 
+        "password": "admin"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if(res.getStatus() === 200) {
+          bru.setEnvVar("administradorToken", res.getBody().token);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

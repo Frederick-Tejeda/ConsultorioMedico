@@ -1,0 +1,30 @@
+info:
+  name: Crear Administrador
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/usuarios/administrador"
+  body:
+    type: json
+    data: |-
+      {
+        "correo": "admin@admin.admin",
+        "password": "admin",
+        "nombre": "Admin Prueba"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if(res.getStatus() === 200) {
+          bru.setEnvVar("token", res.getBody().token);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

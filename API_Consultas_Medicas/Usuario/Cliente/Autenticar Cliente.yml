@@ -1,0 +1,29 @@
+info:
+  name: Autenticar Cliente
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/usuarios/cliente/auth"
+  body:
+    type: json
+    data: |-
+      { 
+        "correo": "frederick@test.com", 
+        "password": "MiPasswordSeguro123"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if(res.getStatus() === 200) {
+          bru.setEnvVar("clienteToken", res.getBody().token);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

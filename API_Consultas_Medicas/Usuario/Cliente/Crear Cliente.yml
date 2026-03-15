@@ -1,0 +1,35 @@
+info:
+  name: Crear Cliente
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/usuarios/cliente"
+  body:
+    type: json
+    data: |-
+      {
+        "correo": "frederick@test.com",
+        "password": "MiPasswordSeguro123",
+        "nombres": "Frederick",
+        "apellidos": "Tejeda",
+        "telefono": "809-555-1234",
+        "tipoId": "CED",
+        "detalleId": "40212345678",
+        "fechaNac": "1998-05-15"
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if(res.getStatus() === 200) {
+          bru.setEnvVar("token", res.getBody().token);
+        }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

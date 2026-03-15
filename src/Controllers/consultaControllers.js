@@ -1,0 +1,90 @@
+const pool = require('../database');
+
+const controller = {};
+
+// ==========================================
+// AGENDAR UNA NUEVA CONSULTA
+// ==========================================
+controller.agendarConsulta = async (req, res) => {
+    const { idCliente, idDoctor, fecha, prioridad } = req.body;
+
+    // Validación básica
+    if (!idCliente || !idDoctor || !fecha || !prioridad) {
+        return res.status(400).json({ "message": "Faltan datos requeridos para agendar la consulta", "success": false });
+    }
+
+    try {
+        // Llamamos al procedimiento almacenado usando CALL
+        await pool.query(
+            'CALL sp_agendar_consulta($1, $2, $3, $4)', 
+            [idCliente, idDoctor, fecha, prioridad]
+        );
+
+        return res.status(201).json({ "message": "Consulta agendada exitosamente", "success": true });
+    } catch (error) {
+        console.error('Error al agendar consulta:', error);
+        
+        // Manejo de errores específicos de PostgreSQL
+        if (error.code === '23503') { // Violación de llave foránea (el doctor o cliente no existe)
+            return res.status(404).json({ "message": "El cliente o el doctor especificado no existe", "success": false });
+        }
+        
+        return res.status(500).json({ "message": "Algo salió mal al agendar la consulta...", "success": false });
+    }
+};
+
+// ==========================================
+// OBTENER EL HISTORIAL DE UN PACIENTE
+// ==========================================
+controller.getHistorialPaciente = async (req, res) => {
+    const { idCliente } = req.params;
+
+    try {
+        // Llamamos a la función usando SELECT * FROM
+        const { rows } = await pool.query(
+            'SELECT * FROM fn_obtener_historial_paciente($1)', 
+            [idCliente]
+        );
+
+        // Si no hay filas, simplemente devolvemos un array vacío (no es un error, solo un paciente nuevo)
+        return res.status(200).json({ "historial": rows, "success": true });
+    } catch (error) {
+        console.error('Error al obtener historial:', error);
+        return res.status(500).json({ "message": "Algo salió mal al consultar el historial...", "success": false });
+    }
+};
+
+// ==========================================
+// ACTUALIZAR EL ESTADO DE UNA CONSULTA
+// ==========================================
+controller.updateEstadoConsulta = async (req, res) => {
+    const { idConsulta } = req.params;
+    const { nuevoEstado } = req.body; // Ej: 'COMPLETADA', 'CANCELADA '
+
+    if (!nuevoEstado) {
+        return res.status(400).json({ "message": "Debe especificar el nuevo estado", "success": false });
+    }
+
+    // Aseguramos que el estado tenga el formato correcto (mayúsculas y sin espacios extra)
+    const estadoLimpio = nuevoEstado.trim().toUpperCase();
+
+    try {
+        await pool.query(
+            'CALL sp_actualizar_estado_consulta($1, $2)', 
+            [idConsulta, estadoLimpio]
+        );
+
+        return res.status(200).json({ "message": "Estado de la consulta actualizado", "success": true });
+    } catch (error) {
+        console.error('Error al actualizar estado:', error);
+        
+        // Capturamos la violación del CONSTRAINT CHECK de estados permitidos (23514)
+        if (error.code === '23514') {
+            return res.status(400).json({ "message": "El estado proporcionado no es válido", "success": false });
+        }
+
+        return res.status(500).json({ "message": "Algo salió mal al actualizar la consulta...", "success": false });
+    }
+};
+
+module.exports = controller;

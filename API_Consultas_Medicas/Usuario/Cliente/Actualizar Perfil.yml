@@ -1,0 +1,28 @@
+info:
+  name: Actualizar Perfil
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/usuarios/cliente/8/perfil"
+  body:
+    type: json
+    data: |-
+      { 
+        "nombres" : "Frederick", 
+        "apellidos": "Tejeda", 
+        "telefono": "829-854-4185", 
+        "tipoId": "CED", 
+        "detalleId": "40214809952", 
+        "fechaNac": "2005-09-18" 
+      }
+  auth:
+    type: bearer
+    token: "{{clienteToken}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

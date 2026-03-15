@@ -1,0 +1,8 @@
+name: Desarrollo
+variables:
+  - name: baseUrl
+    value: http://localhost:3000
+  - secret: true
+    name: clienteToken
+  - secret: true
+    name: administradorToken
