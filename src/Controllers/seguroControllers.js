@@ -6,26 +6,24 @@ const controller = {};
 // REGISTRAR UNA NUEVA ASEGURADORA Y SU CONTACTO
 // ==========================================
 controller.registrarSeguro = async (req, res) => {
-    // idSeguro debe ser de 3 caracteres (ej. 'SEN', 'HUM', 'MAP')
-    const { idSeguro, nombre, tipoContacto, detalleContacto } = req.body;
+    // Ya no extraemos idSeguro del body
+    const { nombre, tipoContacto, detalleContacto } = req.body;
 
-    if (!idSeguro || !nombre || !tipoContacto || !detalleContacto) {
-        return res.status(400).json({ "message": "Faltan datos para registrar la aseguradora y su contacto principal", "success": false });
+    if (!nombre || !tipoContacto || !detalleContacto) {
+        return res.status(400).json({ "message": "Faltan datos obligatorios", "success": false });
     }
 
     try {
+        // La llamada ahora solo lleva 3 parámetros
         await pool.query(
-            'CALL sp_registrar_seguro($1, $2, $3, $4)', 
-            [idSeguro.toUpperCase(), nombre, tipoContacto.toUpperCase(), detalleContacto]
+            'CALL sp_registrar_seguro($1, $2, $3)', 
+            [nombre, tipoContacto.toUpperCase(), detalleContacto]
         );
 
-        return res.status(201).json({ "message": "Aseguradora registrada exitosamente", "success": true });
+        return res.status(201).json({ "message": "Seguro registrado con éxito (ID generado automáticamente)", "success": true });
     } catch (error) {
-        console.error('Error al registrar seguro:', error);
-        if (error.code === '23505') {
-            return res.status(409).json({ "message": "Ya existe una aseguradora con ese código o nombre", "success": false });
-        }
-        return res.status(500).json({ "message": "Algo salió mal al registrar la aseguradora...", "success": false });
+        console.error(error);
+        return res.status(500).json({ "message": "Error al registrar", "success": false });
     }
 };
 
@@ -71,7 +69,7 @@ controller.vincularSeguroCliente = async (req, res) => {
     try {
         await pool.query(
             'CALL sp_vincular_seguro_cliente($1, $2, $3, $4, $5)', 
-            [idSeguro.toUpperCase(), idCliente, nss, numeroAfiliado, planSeguro]
+            [idSeguro, idCliente, nss, numeroAfiliado, planSeguro]
         );
 
         return res.status(201).json({ "message": "Seguro vinculado exitosamente al historial del paciente", "success": true });

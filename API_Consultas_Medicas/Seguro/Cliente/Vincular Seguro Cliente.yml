@@ -1,0 +1,26 @@
+info:
+  name: Vincular Seguro Cliente
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/seguros/cliente/4"
+  body:
+    type: json
+    data: |-
+      { 
+        "idSeguro": 3, 
+        "nss": "123456789", 
+        "numeroAfiliado": "123456789", 
+        "planSeguro": "Basico" 
+      }
+  auth:
+    type: bearer
+    token: "{{clienteToken}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

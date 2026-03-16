@@ -11,7 +11,7 @@ const { verify } = require('../jwt');
 // ==========================================
 // CATÁLOGO GENERAL DE ASEGURADORAS
 // ==========================================
-router.route('/')
+router.route('/administrador')
     .get(verify, getSeguros) // Listar todas las aseguradoras y sus contactos
     .post(verify, registrarSeguro) // Registrar una nueva aseguradora
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));

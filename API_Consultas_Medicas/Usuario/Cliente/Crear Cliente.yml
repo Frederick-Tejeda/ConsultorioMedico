@@ -10,8 +10,8 @@ http:
     type: json
     data: |-
       {
-        "correo": "frederick@test.com",
-        "password": "MiPasswordSeguro123",
+        "correo": "cliente@cliente.cliente",
+        "password": "cliente",
         "nombres": "Frederick",
         "apellidos": "Tejeda",
         "telefono": "809-555-1234",

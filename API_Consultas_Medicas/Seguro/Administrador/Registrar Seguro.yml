@@ -1,0 +1,25 @@
+info:
+  name: Registrar Seguro
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/seguros/administrador"
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Mapfre Salud ARS",
+        "tipoContacto": "TEL",
+        "detalleContacto": "809-563-5555"
+      }
+  auth:
+    type: bearer
+    token: "{{administradorToken}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
