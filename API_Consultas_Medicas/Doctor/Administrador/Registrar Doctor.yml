@@ -1,0 +1,28 @@
+info:
+  name: Registrar Doctor
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/doctores/administrador"
+  body:
+    type: json
+    data: |-
+      {
+        "nombres": "Carmen",
+        "apellidos": "Santos",
+        "telefono": "829-555-2020",
+        "tipoId": "CED",
+        "detalleId": "00198765432",
+        "fechaNac": "20001212"
+      }
+  auth:
+    type: bearer
+    token: "{{administradorToken}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

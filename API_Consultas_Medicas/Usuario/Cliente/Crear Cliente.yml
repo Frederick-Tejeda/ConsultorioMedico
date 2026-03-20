@@ -10,13 +10,13 @@ http:
     type: json
     data: |-
       {
-        "correo": "cliente@cliente.cliente",
+        "correo": "cliente1@cliente.cliente",
         "password": "cliente",
         "nombres": "Frederick",
         "apellidos": "Tejeda",
         "telefono": "809-555-1234",
         "tipoId": "CED",
-        "detalleId": "40212345678",
+        "detalleId": "40212345679",
         "fechaNac": "1998-05-15"
       }
 

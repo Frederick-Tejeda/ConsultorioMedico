@@ -6,18 +6,20 @@ const controller = {};
 // AGENDAR UNA NUEVA CONSULTA
 // ==========================================
 controller.agendarConsulta = async (req, res) => {
-    const { idCliente, idDoctor, fecha, prioridad } = req.body;
+    const { idCliente, idDoctor, idEspecialidad, fecha, prioridad, idSeguroCliente } = req.body;
 
     // Validación básica
-    if (!idCliente || !idDoctor || !fecha || !prioridad) {
-        return res.status(400).json({ "message": "Faltan datos requeridos para agendar la consulta", "success": false });
+    if (!idCliente || !idEspecialidad || !idDoctor || !fecha || !prioridad) {
+        return res.status(400).json({ "message": "Faltan datos requeridos (cliente, doctor, especialidad, fecha o prioridad)", "success": false });
     }
 
     try {
+        const seguroId = idSeguroCliente ? idSeguroCliente : null;
+
         // Llamamos al procedimiento almacenado usando CALL
         await pool.query(
-            'CALL sp_agendar_consulta($1, $2, $3, $4)', 
-            [idCliente, idDoctor, fecha, prioridad]
+            'CALL sp_agendar_consulta($1, $2, $3, $4, $5, $6)', 
+            [idCliente, idDoctor, idEspecialidad, seguroId, fecha, prioridad]
         );
 
         return res.status(201).json({ "message": "Consulta agendada exitosamente", "success": true });
@@ -26,7 +28,7 @@ controller.agendarConsulta = async (req, res) => {
         
         // Manejo de errores específicos de PostgreSQL
         if (error.code === '23503') { // Violación de llave foránea (el doctor o cliente no existe)
-            return res.status(404).json({ "message": "El cliente o el doctor especificado no existe", "success": false });
+            return res.status(404).json({ "message": "El cliente, doctor, especialidad o seguro no existe en el sistema", "success": false });
         }
         
         return res.status(500).json({ "message": "Algo salió mal al agendar la consulta...", "success": false });

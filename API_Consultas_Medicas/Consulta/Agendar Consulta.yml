@@ -1,14 +1,14 @@
 info:
-  name: Obtener Usuario
+  name: Agendar Consulta
   type: http
-  seq: 3
+  seq: 1
 
 http:
-  method: GET
-  url: "{{baseUrl}}/usuarios/cliente/8"
+  method: POST
+  url: "{{baseUrl}}/consultas"
   auth:
     type: bearer
-    token: "{{administradorToken}}"
+    token: "{{clienteToken}}"
 
 settings:
   encodeUrl: true

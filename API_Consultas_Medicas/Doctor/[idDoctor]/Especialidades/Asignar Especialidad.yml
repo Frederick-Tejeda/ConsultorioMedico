@@ -1,0 +1,23 @@
+info:
+  name: Asignar Especialidad
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/doctores/administrador/3/especialidades"
+  body:
+    type: json
+    data: |-
+      {
+        "idEspecialidad": 3
+      }
+  auth:
+    type: bearer
+    token: "{{administradorToken}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

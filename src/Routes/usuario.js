@@ -34,7 +34,6 @@ router.route('/cliente/auth')
 router.route('/administrador')
     .get(verify, getUsers) 
     .post(createAdmin)
-    .delete(verify, deleteUser) // Solo un Admin debería poder eliminar usuarios
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================
@@ -50,7 +49,7 @@ router.route('/administrador/auth')
 router.route('/cliente/:idUser')
     .get(verify, getUser)
     .put(verify, updateUser)
-    .delete(verify, deleteUser) 
+    .delete(verify, deleteUser) // Solo un Admin debería poder eliminar usuarios
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================

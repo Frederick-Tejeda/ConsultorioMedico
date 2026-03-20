@@ -6,17 +6,17 @@ const controller = {};
 // REGISTRAR UN NUEVO DOCTOR
 // ==========================================
 controller.registrarDoctor = async (req, res) => {
-    const { nombres, apellidos, telefono, tipoId, detalleId } = req.body;
+    const { nombres, apellidos, telefono, tipoId, detalleId, fechaNac } = req.body;
 
-    if (!nombres || !apellidos || !telefono || !tipoId || !detalleId) {
+    if (!nombres || !apellidos || !telefono || !tipoId || !detalleId || !fechaNac) {
         return res.status(400).json({ "message": "Faltan datos personales para registrar al doctor", "success": false });
     }
 
     try {
         // Llama al procedimiento almacenado que inserta en Persona y luego en Doctor
         await pool.query(
-            'CALL sp_registrar_doctor($1, $2, $3, $4, $5)', 
-            [nombres, apellidos, telefono, tipoId, detalleId]
+            'CALL sp_registrar_doctor($1, $2, $3, $4, $5, $6)', 
+            [nombres, apellidos, telefono, tipoId, detalleId, fechaNac]
         );
 
         return res.status(201).json({ "message": "Doctor registrado exitosamente", "success": true });
@@ -42,7 +42,7 @@ controller.getDoctores = async (req, res) => {
                 p.Nombres, 
                 p.Apellidos, 
                 p.Telefono,
-                COALESCE(ARRAY_AGG(e.TipoEspecialidad) FILTER (WHERE e.TipoEspecialidad IS NOT NULL), '{}') AS especialidades
+                COALESCE(ARRAY_AGG(e.Nombre) FILTER (WHERE e.Nombre IS NOT NULL), '{}') AS especialidades
             FROM Doctor d
             JOIN Persona p ON d.IdPersona = p.IdPersona
             LEFT JOIN EspecialidadDoctor ed ON d.IdDoctor = ed.IdDoctor
@@ -68,7 +68,7 @@ controller.getDoctorById = async (req, res) => {
         const query = `
             SELECT 
                 d.IdDoctor, p.Nombres, p.Apellidos, p.Telefono, p.TipoIdentificacion, p.DetalleIdentificacion,
-                COALESCE(ARRAY_AGG(e.TipoEspecialidad) FILTER (WHERE e.TipoEspecialidad IS NOT NULL), '{}') AS especialidades
+                COALESCE(ARRAY_AGG(e.Nombre) FILTER (WHERE e.Nombre IS NOT NULL), '{}') AS especialidades
             FROM Doctor d
             JOIN Persona p ON d.IdPersona = p.IdPersona
             LEFT JOIN EspecialidadDoctor ed ON d.IdDoctor = ed.IdDoctor
@@ -116,6 +116,65 @@ controller.asignarEspecialidad = async (req, res) => {
             return res.status(409).json({ "message": "El doctor ya tiene asignada esta especialidad", "success": false });
         }
         return res.status(500).json({ "message": "Algo salió mal al asignar la especialidad...", "success": false });
+    }
+};
+
+// ==========================================
+// REPORTE MENSUAL PARA NÓMINA DE UN DOCTOR
+// ==========================================
+controller.getReporteMensualDoctor = async (req, res) => {
+    const { idDoctor } = req.params;
+    
+    // Extraemos mes y año de los query parameters (ej: ?mes=3&anio=2026)
+    const { mes, anio } = req.query; 
+
+    if (!mes || !anio) {
+        return res.status(400).json({ 
+            "message": "Debe proporcionar el mes y el año en la URL (ej. ?mes=3&anio=2026)", 
+            "success": false 
+        });
+    }
+
+    try {
+        const query = `
+            SELECT 
+                cc.IdConsultasCliente,
+                cc.Fecha,
+                e.Nombre AS EspecialidadAtendida,
+                p.Nombres AS NombrePaciente,
+                p.Apellidos AS ApellidoPaciente,
+                f.SubTotal AS MontoGenerado,
+                f.EstadoPago
+            FROM ConsultasCliente cc
+            JOIN Especialidad e ON cc.IdEspecialidad = e.IdEspecialidad
+            JOIN Cliente c ON cc.IdCliente = c.IdCliente
+            JOIN Persona p ON c.IdPersona = p.IdPersona
+            JOIN Factura f ON cc.IdConsultasCliente = f.IdConsultasCliente
+            WHERE cc.IdDoctor = $1 
+              AND cc.Estado = 'COMPLETADA' 
+              AND EXTRACT(MONTH FROM cc.Fecha) = $2
+              AND EXTRACT(YEAR FROM cc.Fecha) = $3
+            ORDER BY cc.Fecha ASC;
+        `;
+        
+        const { rows } = await pool.query(query, [idDoctor, mes, anio]);
+
+        const totalGenerado = rows.reduce((acc, curr) => acc + parseFloat(curr.montogenerado), 0);
+
+        return res.status(200).json({ 
+            "reporte": {
+                "mes": parseInt(mes),
+                "anio": parseInt(anio),
+                "totalCitasAtendidas": rows.length,
+                "totalGenerado": totalGenerado
+            },
+            "detalleConsultas": rows, 
+            "success": true 
+        });
+
+    } catch (error) {
+        console.error('Error al generar reporte de nómina:', error);
+        return res.status(500).json({ "message": "Algo salió mal al obtener el reporte...", "success": false });
     }
 };
 

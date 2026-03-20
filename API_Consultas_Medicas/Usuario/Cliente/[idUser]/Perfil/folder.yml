@@ -1,0 +1,7 @@
+info:
+  name: Perfil
+  type: folder
+  seq: 1
+
+request:
+  auth: inherit
