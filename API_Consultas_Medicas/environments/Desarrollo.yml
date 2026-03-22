@@ -6,3 +6,5 @@ variables:
     name: clienteToken
   - secret: true
     name: administradorToken
+  - secret: true
+    name: cajaToken

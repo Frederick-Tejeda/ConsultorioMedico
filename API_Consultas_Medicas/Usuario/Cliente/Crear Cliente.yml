@@ -20,14 +20,6 @@ http:
         "fechaNac": "1998-05-15"
       }
 
-runtime:
-  scripts:
-    - type: after-response
-      code: |-
-        if(res.getStatus() === 200) {
-          bru.setEnvVar("token", res.getBody().token);
-        }
-
 settings:
   encodeUrl: true
   timeout: 0

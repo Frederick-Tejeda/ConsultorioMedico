@@ -2,7 +2,9 @@ const { Router } = require('express');
 const router = Router();
 const {
     authAdmin,
+    authCajero,
     createAdmin,
+    createCajero,
     getUsers, 
     authUser, 
     createUser, 
@@ -12,7 +14,7 @@ const {
     updateProfile,
     deleteUser
 } = require('../Controllers/usuarioControllers');
-const { verify } = require('../jwt');
+const { verifyAdmin, verifyAdmin_Client, verifyClient } = require('../jwt');
 
 // ==========================================
 // RUTAS BASE DE USUARIOS
@@ -32,8 +34,12 @@ router.route('/cliente/auth')
 // RUTAS BASE DE Administradores
 // ==========================================
 router.route('/administrador')
-    .get(verify, getUsers) 
-    .post(createAdmin)
+    .get(verifyAdmin, getUsers) 
+    .post(verifyAdmin, createAdmin)
+    .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
+
+router.route('/cajero')
+    .post(verifyAdmin, createCajero)
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================
@@ -43,21 +49,25 @@ router.route('/administrador/auth')
     .post(authAdmin)
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
+router.route('/cajero/auth')
+.post(authCajero)
+.all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
+
 // ==========================================
 // OPERACIONES DE UN USUARIO ESPECÍFICO (Credenciales)
 // ==========================================
 router.route('/cliente/:idUser')
-    .get(verify, getUser)
-    .put(verify, updateUser)
-    .delete(verify, deleteUser) // Solo un Admin debería poder eliminar usuarios
+    .get(verifyAdmin_Client, getUser)
+    .put(verifyClient, updateUser)
+    .delete(verifyAdmin, deleteUser) // Solo un Admin debería poder eliminar usuarios
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================
 // PERFIL DEL USUARIO (Datos de la tabla Persona)
 // ==========================================
 router.route('/cliente/:idUser/perfil')
-    .get(verify, getProfile)
-    .put(verify, updateProfile)
+    .get(verifyAdmin_Client, getProfile)
+    .put(verifyClient, updateProfile)
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================

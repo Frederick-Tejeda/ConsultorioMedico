@@ -1,4 +1,3 @@
-const { decode } = require('jsonwebtoken');
 const { Encrypt, Decrypt } = require('../crypt');
 const { sign } = require('../jwt');
 const pool = require('../database');
@@ -27,16 +26,42 @@ controller.authAdmin = async (req, res) => {
         
         if(rows.length === 0) return res.status(404).json({"message": 'Admin no exist...', "success": false});
         
-        const admin = rows[0];
+        const admin = rows[0];   
         
         const decryptedPassword = Decrypt(admin.contrasena);
         
         if(decryptedPassword[0] === "ERR") return res.status(500).json({"message": decryptedPassword[1], "success": false});
         if(decryptedPassword[1] !== password) return res.status(401).json({"message": 'Wrong password...', "success": false});
         
-        sign({ id: admin.IdUsuario }).then( ([status, token]) => {
+        sign({ IdUsuario: admin.idusuario, TipoUsuario: admin.tipousuario }).then(([status, token]) => {
             if(!status) return res.status(500).json({"message": token, "success": false});
-            return res.status(200).json({"idAdmin": admin.idusuario, "token": token, "tipo": admin.tipousuario, "success": true});
+            return res.status(200).json({"idUsuario": admin.idusuario, "token": token, "tipo": admin.tipousuario, "success": true});
+        });
+    } catch(error) {
+        console.error(error);
+        return res.status(500).json({"message": 'Something went wrong...', "success": false});
+    }
+}
+
+controller.authCajero = async (req, res) => {
+    const { correo, password } = req.body;
+    if(!correo || !password) return res.status(400).json({"message": 'Faltan credenciales', "success": false});
+    
+    try {
+        const { rows } = await pool.query('SELECT * FROM Usuario WHERE Correo = $1', [correo]);
+        
+        if(rows.length === 0) return res.status(404).json({"message": 'Caja no exist...', "success": false});
+        
+        const caja = rows[0];   
+        
+        const decryptedPassword = Decrypt(caja.contrasena);
+        
+        if(decryptedPassword[0] === "ERR") return res.status(500).json({"message": decryptedPassword[1], "success": false});
+        if(decryptedPassword[1] !== password) return res.status(401).json({"message": 'Wrong password...', "success": false});
+        
+        sign({ IdUsuario: caja.idusuario, TipoUsuario: caja.tipousuario }).then(([status, token]) => {
+            if(!status) return res.status(500).json({"message": token, "success": false});
+            return res.status(200).json({"idUsuario": caja.idusuario, "token": token, "tipo": caja.tipousuario, "success": true});
         });
     } catch(error) {
         console.error(error);
@@ -76,6 +101,41 @@ controller.createAdmin = async (req, res) => {
     } catch(error) {
         console.error('Error al registrar administrador:', error);
         return res.status(500).json({"message": "Algo salió mal al registrar el administrador...", "success": false});
+    }
+}
+
+controller.createCajero = async (req, res) => {
+    // Recibimos todos los datos necesarios para las 3 tablas
+    const { correo, password, nombre } = req.body;
+    
+    // Validación básica de campos vacíos
+    if (!correo || !password || !nombre) {
+        return res.status(400).json({ "message": "Faltan datos obligatorios para completar el registro", "success": false });
+    }
+
+    try {
+        // 1. Verificamos si el correo ya existe para no hacer procesos innecesarios
+        const checkUser = await pool.query('SELECT * FROM Usuario WHERE Correo = $1', [correo]);
+        if(checkUser.rows.length > 0) {
+            return res.status(409).json({ "message": "El correo ya está registrado", "success": false});
+        }
+
+        // 2. Encriptamos la contraseña usando tu módulo
+        const encryptedPassword = Encrypt(password);
+        if(encryptedPassword[0] === "ERR") {
+            return res.status(500).json({ "message": encryptedPassword[1], "success": false});
+        }
+        
+        // 3. Ejecutamos el procedimiento almacenado pasando los 3 parámetros
+        await pool.query(
+            'CALL sp_registrar_cajero($1, $2, $3)', 
+            [correo, encryptedPassword[1], nombre]
+        );
+        
+        return res.status(201).json({ "message": "Cajero registrado exitosamente", "success": true });
+    } catch(error) {
+        console.error('Error al registrar cajero:', error);
+        return res.status(500).json({"message": "Algo salió mal al registrar el cajero...", "success": false});
     }
 }
 

@@ -6,14 +6,14 @@ const {
     vincularSeguroCliente, 
     getSegurosCliente 
 } = require('../Controllers/seguroControllers');
-const { verify } = require('../jwt');
+const { verifyAdmin, verifyAdmin_Client, verifyClient } = require('../jwt');
 
 // ==========================================
 // CATÁLOGO GENERAL DE ASEGURADORAS
 // ==========================================
 router.route('/administrador')
-    .get(verify, getSeguros) // Listar todas las aseguradoras y sus contactos
-    .post(verify, registrarSeguro) // Registrar una nueva aseguradora
+    .get(verifyAdmin, getSeguros) // Listar todas las aseguradoras y sus contactos
+    .post(verifyAdmin, registrarSeguro) // Registrar una nueva aseguradora
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================
@@ -23,8 +23,8 @@ router.route('/administrador')
 // POST /api/seguros/cliente/3 (Vincular nuevo seguro)
 // GET /api/seguros/cliente/3 (Ver todo su historial de seguros)
 router.route('/cliente/:idCliente')
-    .get(verify, getSegurosCliente)
-    .post(verify, vincularSeguroCliente)
+    .get(verifyAdmin_Client, getSegurosCliente)
+    .post(verifyClient, vincularSeguroCliente)
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================

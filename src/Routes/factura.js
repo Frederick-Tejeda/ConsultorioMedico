@@ -4,14 +4,14 @@ const {
     getFacturaByConsulta, 
     pagarFactura 
 } = require('../Controllers/facturaController');
-const { verify } = require('../jwt');
+const { verifyCashier, verifyCashier_Client } = require('../jwt');
 
 // ==========================================
 // OBTENER FACTURA POR ID DE CONSULTA
 // Ruta esperada: GET /api/facturas/consulta/15
 // ==========================================
 router.route('/consulta/:idConsulta')
-    .get(verify, getFacturaByConsulta)
+    .get(verifyCashier_Client, getFacturaByConsulta)
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================
@@ -19,7 +19,7 @@ router.route('/consulta/:idConsulta')
 // Ruta esperada: PUT /api/facturas/8/pagar
 // ==========================================
 router.route('/:idFactura/pagar')
-    .put(verify, pagarFactura)
+    .put(verifyCashier, pagarFactura)
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================

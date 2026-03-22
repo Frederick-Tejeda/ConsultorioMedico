@@ -5,14 +5,14 @@ const {
     getHistorialPaciente, 
     updateEstadoConsulta 
 } = require('../Controllers/consultaControllers');
-const { verify } = require('../jwt');
+const { verifyCashier_Client, verifyAdmin_Client } = require('../jwt');
 
 // ==========================================
 // AGENDAR NUEVA CONSULTA
 // ==========================================
 router.route('/')
     // Usamos verify porque solo usuarios autenticados (pacientes o admins) deberían agendar
-    .post(verify, agendarConsulta)
+    .post(verifyCashier_Client, agendarConsulta)
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================
@@ -20,7 +20,7 @@ router.route('/')
 // ==========================================
 // Ruta esperada: GET /api/consultas/paciente/5
 router.route('/paciente/:idCliente')
-    .get(verify, getHistorialPaciente)
+    .get(verifyAdmin_Client, getHistorialPaciente)
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================
@@ -28,7 +28,7 @@ router.route('/paciente/:idCliente')
 // ==========================================
 // Ruta esperada: PUT /api/consultas/12/estado
 router.route('/:idConsulta/estado')
-    .put(verify, updateEstadoConsulta)
+    .put(verifyCashier_Client, updateEstadoConsulta)
     .all((req, res) => res.status(405).send({ message: 'Method Not Allowed' }));
 
 // ==========================================

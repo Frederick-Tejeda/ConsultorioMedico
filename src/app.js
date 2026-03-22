@@ -25,6 +25,7 @@ app.use('/usuarios', require('./Routes/usuario'));
 app.use('/seguros', require('./Routes/seguro'));
 app.use('/doctores', require('./Routes/doctor'));
 app.use('/consultas', require('./Routes/consulta'));
+app.use('/facturas', require('./Routes/factura'));
 
 // Manejo de rutas no encontradas (404)
 app.use((req, res) => {
