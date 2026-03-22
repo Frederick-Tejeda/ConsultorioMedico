@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/doctores/3"
+  url: "{{baseUrl}}/doctores/2"
   auth:
     type: bearer
     token: "{{administradorToken}}"

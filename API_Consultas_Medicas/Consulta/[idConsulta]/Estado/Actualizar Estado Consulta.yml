@@ -5,7 +5,13 @@ info:
 
 http:
   method: PUT
-  url: "{{baseUrl}}/consultas/1/estado"
+  url: "{{baseUrl}}/consultas/5/estado"
+  body:
+    type: json
+    data: |-
+      { 
+      "nuevoEstado": "COMPLETADA"
+      }
   auth:
     type: bearer
     token: "{{clienteToken}}"

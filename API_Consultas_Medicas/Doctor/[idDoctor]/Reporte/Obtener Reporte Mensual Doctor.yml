@@ -5,10 +5,10 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/doctores/administrador/2/reporte?mes=12&anio=2026"
+  url: "{{baseUrl}}/doctores/administrador/2/reporte?mes=03&anio=2026"
   params:
     - name: mes
-      value: "12"
+      value: "03"
       type: query
     - name: anio
       value: "2026"

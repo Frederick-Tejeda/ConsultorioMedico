@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/consultas/paciente/1"
+  url: "{{baseUrl}}/consultas/paciente/4"
   auth:
     type: bearer
     token: "{{clienteToken}}"

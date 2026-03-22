@@ -25,13 +25,24 @@ controller.agendarConsulta = async (req, res) => {
         return res.status(201).json({ "message": "Consulta agendada exitosamente", "success": true });
     } catch (error) {
         console.error('Error al agendar consulta:', error);
-        
-        // Manejo de errores específicos de PostgreSQL
-        if (error.code === '23503') { // Violación de llave foránea (el doctor o cliente no existe)
-            return res.status(404).json({ "message": "El cliente, doctor, especialidad o seguro no existe en el sistema", "success": false });
+        // 1. Atrapamos nuestra validación personalizada de la base de datos
+        if (error.message.includes('VALIDATION_ERROR')) {
+            return res.status(400).json({ 
+                "message": "El doctor seleccionado no atiende la especialidad que solicitó.", 
+                "success": false 
+            });
         }
-        
-        return res.status(500).json({ "message": "Algo salió mal al agendar la consulta...", "success": false });
+        // 2. Manejo de errores de llave foránea (si mandan un ID que no existe)
+        if (error.code === '23503') { 
+            return res.status(404).json({ 
+                "message": "El cliente, doctor, especialidad o seguro no existe en el sistema", 
+                "success": false 
+            });
+        }
+        return res.status(500).json({ 
+            "message": "Algo salió mal al agendar la consulta...", 
+            "success": false 
+        });
     }
 };
 

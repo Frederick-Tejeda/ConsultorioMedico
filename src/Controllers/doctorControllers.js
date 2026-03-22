@@ -6,14 +6,16 @@ const controller = {};
 // REGISTRAR UN NUEVO DOCTOR
 // ==========================================
 controller.registrarDoctor = async (req, res) => {
+    // 1. Extraemos fechaNac del body
     const { nombres, apellidos, telefono, tipoId, detalleId, fechaNac } = req.body;
 
+    // 2. Agregamos fechaNac a la validación
     if (!nombres || !apellidos || !telefono || !tipoId || !detalleId || !fechaNac) {
-        return res.status(400).json({ "message": "Faltan datos personales para registrar al doctor", "success": false });
+        return res.status(400).json({ "message": "Faltan datos personales (incluyendo fecha de nacimiento) para registrar al doctor", "success": false });
     }
 
     try {
-        // Llama al procedimiento almacenado que inserta en Persona y luego en Doctor
+        // 3. Pasamos los 6 parámetros al procedimiento
         await pool.query(
             'CALL sp_registrar_doctor($1, $2, $3, $4, $5, $6)', 
             [nombres, apellidos, telefono, tipoId, detalleId, fechaNac]
@@ -22,7 +24,6 @@ controller.registrarDoctor = async (req, res) => {
         return res.status(201).json({ "message": "Doctor registrado exitosamente", "success": true });
     } catch (error) {
         console.error('Error al registrar doctor:', error);
-        // Captura violación de unicidad (ej. misma cédula ya registrada en Persona)
         if (error.code === '23505') {
             return res.status(409).json({ "message": "Ya existe una persona con esta identificación", "success": false });
         }

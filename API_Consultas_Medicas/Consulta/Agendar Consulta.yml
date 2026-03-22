@@ -6,6 +6,17 @@ info:
 http:
   method: POST
   url: "{{baseUrl}}/consultas"
+  body:
+    type: json
+    data: |-
+      {
+        "idCliente": 4,
+        "idDoctor": 2,
+        "idEspecialidad": 2,
+        "idSeguroCliente": 4,
+        "fecha": "2026-03-21",
+        "prioridad": 1
+      }
   auth:
     type: bearer
     token: "{{clienteToken}}"
