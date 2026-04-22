@@ -3,11 +3,18 @@ const cors = require("cors");
 const helmet = require("helmet");
 const app = express();
 
+const corsOptions = {
+  origin: 'https://interfaz-core.vercel.app/', 
+  methods: ['GET', 'POST', 'PUT'],           
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,                         
+};
+
 app.set("PORT", process.env.PORT);
 app.set("STAGE", process.env.STAGE);
 
+app.use(cors(corsOptions));
 app.use(helmet());
-app.use(cors());
 app.use(express.json());
 
 // Permite procesar datos enviados desde formularios tradicionales (URL-encoded)
