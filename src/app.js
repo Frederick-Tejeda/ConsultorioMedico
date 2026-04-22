@@ -1,19 +1,31 @@
 const express = require("express");
-const cors = require("cors");
+// const cors = require("cors");
 const helmet = require("helmet");
 const app = express();
 
-const corsOptions = {
-  origin: 'https://interfaz-core.vercel.app/', 
-  methods: ['GET', 'POST', 'PUT'],           
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,                         
-};
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://interfaz-core.vercel.app/"); 
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  
+  // Handle preflight (OPTIONS) requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// const corsOptions = {
+//   origin: 'https://interfaz-core.vercel.app/', 
+//   methods: ['GET', 'POST', 'PUT'],           
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true,                         
+// };
 
 app.set("PORT", process.env.PORT);
 app.set("STAGE", process.env.STAGE);
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 app.use(helmet());
 app.use(express.json());
 
