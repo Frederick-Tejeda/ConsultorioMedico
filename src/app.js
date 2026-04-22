@@ -4,7 +4,7 @@ const helmet = require("helmet");
 const app = express();
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://interfaz-core.vercel.app/"); 
+  res.header("Access-Control-Allow-Origin", "*"); 
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   
